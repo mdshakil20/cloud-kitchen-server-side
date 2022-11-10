@@ -74,12 +74,28 @@ async function run() {
             const services = await cursor.toArray();
             res.send(services);
         })
-
+        //reveiw add 
         app.post('/services/review/addReview', async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.send(result);
         })
+
+        // update api 
+        app.put('/update-review/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const newReview = req.body;
+            const option = {upsert: true};
+            const updatedReview = {
+                $set: {
+                    text:newReview
+                }
+            }
+            const result = await reviewCollection.updateOne(filter, updatedReview, option);
+            res.send(result);
+        })
+
 
         // delete review api 
         app.delete('/review/delete/:id', async (req, res) => {
