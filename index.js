@@ -86,10 +86,11 @@ async function run() {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const newReview = req.body;
+            // console.log(newReview)
             const option = {upsert: true};
             const updatedReview = {
                 $set: {
-                    text:newReview
+                    text:newReview.text
                 }
             }
             const result = await reviewCollection.updateOne(filter, updatedReview, option);
