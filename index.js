@@ -4,15 +4,13 @@ const { application } = require("express");
 const app = express();
 const port = process.env.port || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+require('dotenv').config();
 
 //middleware
 app.use(cors());
 app.use(express.json());
 
-// user : cloud-kichen
-// password: d5TFAy2jShvMHIzq
-
-const uri = "mongodb+srv://cloud-kichen:d5TFAy2jShvMHIzq@cluster0.davow0l.mongodb.net/?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.davow0l.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run() {
