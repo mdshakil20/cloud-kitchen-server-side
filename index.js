@@ -17,44 +17,76 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
-        const userCollection = client.db('nodeMongoDB').collection('services');
+        const serviceCollection = client.db('nodeMongoDB').collection('services');
+        const reviewCollection = client.db('nodeMongoDB').collection('service_review');
 
         // read operation for 3 service
         app.get('/services_3', async (req, res) => {
             const query = {};
-            const cursor = userCollection.find(query);
-            const services = await cursor.limit(3).toArray();
-            res.send(services);
+            const cursor = serviceCollection.find(query);
+            const services = await cursor.toArray();
+            const reviewList = [...services].reverse().slice(0, 3);
+            res.send(reviewList);
+        })
+
+        //add service to db 
+        app.post('/add-service', async (req, res) => {
+            const newService = req.body;
+            const result = await serviceCollection.insertOne(newService);
+            res.send(result);
         })
 
         // read operation for all service
         app.get('/services', async (req, res) => {
             const query = {};
-            const cursor = userCollection.find(query);
+            const cursor = serviceCollection.find(query);
             const services = await cursor.toArray();
             res.send(services);
         })
-
+        // read operation for review by id 
+        app.get('/services/review/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {service_id : id};
+            const cursor = reviewCollection.find(query);
+            const services = await cursor.toArray();
+            res.send(services);
+        })
         // read operation for service details
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const cursor = userCollection.find(query);
+            const cursor = serviceCollection.find(query);
             const services = await cursor.toArray();
             res.send(services);
         })
 
-        app.post('/services/review/:id', async (req, res) => {
+        // read operation for my reviews
+        app.get('/services/my-reviews/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = {   reviewer_email : email };
+            const cursor = reviewCollection.find(query);
+            const services = await cursor.toArray();
+            res.send(services);
+        })
+        // read operation for my reviews by id
+        app.get('/services/my-reviews/:id', async (req, res) => {
             const id = req.params.id;
+            const query = {   _id : ObjectId(id) };
+            const cursor = reviewCollection.find(query);
+            const services = await cursor.toArray();
+            res.send(services);
+        })
+
+        app.post('/services/review/addReview', async (req, res) => {
             const review = req.body;
-            const result = await userCollection.updateOne({ _id: ObjectId(id) },
-                {
-                    $push: {
-                        reviews: {
-                            $each: [review ]
-                        }
-                    }
-                });
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        })
+        // delete review 
+        app.delete('/review/delete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await reviewCollection.deleteOne(query);
             res.send(result);
         })
 
@@ -62,6 +94,8 @@ async function run() {
     finally {
 
     }
+
+
 
 }
 run().catch(err => console.error(err));
